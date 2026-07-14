@@ -17,6 +17,17 @@ CREATE TABLE IF NOT EXISTS conversation_logs (
   created_at TIMESTAMPTZ DEFAULT now()
 );
 
+-- Registros del Club de Nube de Algodón (captura real de leads).
+-- Una persona deja su correo (y opcionalmente su nombre) desde la landing
+-- y se guarda aquí de verdad. UNIQUE(email) evita duplicados.
+CREATE TABLE IF NOT EXISTS club_members (
+  id SERIAL PRIMARY KEY,
+  email TEXT NOT NULL UNIQUE,
+  name TEXT,                    -- opcional
+  source TEXT DEFAULT 'newsletter',  -- de qué formulario vino
+  created_at TIMESTAMPTZ DEFAULT now()
+);
+
 -- Rate limiting simple por IP (ventana deslizante de 1 hora).
 -- Una fila por request; se cuentan las de la última hora.
 CREATE TABLE IF NOT EXISTS chat_requests (

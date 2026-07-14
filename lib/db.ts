@@ -38,6 +38,25 @@ export async function logConversation(params: {
   `;
 }
 
+export type ClubSignupResult = "created" | "already_member";
+
+// Guarda un registro del Club en Neon (captura real de leads).
+// Si el correo ya existe, no falla ni duplica: devuelve "already_member".
+export async function saveClubMember(params: {
+  email: string;
+  name?: string | null;
+  source?: string;
+}): Promise<ClubSignupResult> {
+  const { email, name = null, source = "newsletter" } = params;
+  const rows = (await sql`
+    INSERT INTO club_members (email, name, source)
+    VALUES (${email}, ${name}, ${source})
+    ON CONFLICT (email) DO NOTHING
+    RETURNING id
+  `) as { id: number }[];
+  return rows.length > 0 ? "created" : "already_member";
+}
+
 // Máximo de mensajes por IP en la ventana (protección contra abuso del link público).
 export const RATE_LIMIT_PER_HOUR = 20;
 

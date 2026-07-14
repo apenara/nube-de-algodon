@@ -1,8 +1,9 @@
 # ☁️ Nube de Algodón — Asistente de IA para una tienda de bebés
 
-> **Proyecto 1 · The Vibecoders League (reto de Platzi).**
+> **Proyectos 1 y 2 · The Vibecoders League (reto de Platzi).**
 > Tienda online ficticia de artículos para bebés con un **asistente conversacional de IA**
-> que responde dudas de clientes usando una base de conocimiento real del negocio.
+> (Proyecto 1) y **captura real de datos** desde el formulario del Club (Proyecto 2). Todo se
+> guarda de verdad en una base de datos.
 
 **🔗 Demo:** https://nube-de-algodon.vercel.app/
 
@@ -57,9 +58,42 @@ Una tienda completa que le da contexto al asistente, con dirección de diseño p
 `AnnouncementBar · SiteHeader · Hero · BenefitsStrip · FeaturedProducts · Categories ·
 TrustSection · AssistantPreview · GiftRegistry · ClubNewsletter · SiteFooter`
 
-Las fotos de producto son generadas y optimizadas a WebP. El carrito, buscador y formularios
-son **visuales por ahora** (una demo del reto, sin procesar compras reales); al interactuar
-con ellos aparece un aviso amable (`components/DemoToast.tsx`).
+Las fotos de producto son generadas y optimizadas a WebP. El carrito y el buscador son
+**visuales por ahora** (una demo del reto, sin procesar compras reales); al interactuar con
+ellos aparece un aviso amable (`components/DemoToast.tsx`). El **formulario del Club sí es
+real**: guarda el correo en la base de datos (ver [Proyecto 2](#-proyecto-2--captura-real-de-datos)).
+
+## 🧾 Proyecto 2 — Captura real de datos
+
+> **Proyecto 2 · The Vibecoders League (Platzi).** Publicar una página que no solo se vea
+> bien, sino que **funcione**: cuando alguien deja sus datos, se guardan de verdad en una
+> base de datos.
+
+- **Propuesta de valor clara** — qué es (tienda 100 % online de artículos para bebés 0–3 años),
+  para quién (padres primerizos) y por qué importa (asesoría cercana + asistente de IA que
+  acompaña la compra). Ver Hero, `BenefitsStrip` y `TrustSection`.
+- **Formulario que guarda datos reales** — el **Club de Nube de Algodón** (`components/ClubNewsletter.tsx`):
+  la persona deja su correo → `POST /api/club` → se guarda en la tabla **`club_members`** de
+  Neon (Postgres). Con validación de correo en el servidor, estados de éxito/error reales,
+  manejo de duplicados (`ON CONFLICT (email) DO NOTHING`) y **rate limit por IP** para proteger
+  el link público. No es un botón decorativo: los registros quedan en la base de datos.
+- **Diseño responsive** — Tailwind con breakpoints móviles; el chat y los formularios funcionan
+  en celular (incluido el fix de teclado en iOS Safari).
+- **Bonus — investigación de mercado con IA** — research con búsquedas web reales sobre el
+  mercado de bebés en LatAm, dolores de primerizos y competencia, en
+  [`docs/investigacion-mercado.md`](./docs/investigacion-mercado.md).
+
+**Flujo del formulario:**
+
+```
+Persona → Club (components/ClubNewsletter.tsx)
+        → POST /api/club  { email, source }
+            1. Valida el correo en el servidor (formato + longitud)
+            2. Rate limit por IP (bucket propio 'club:<ip>', ventana de 1 h)
+            3. INSERT en club_members con ON CONFLICT (email) DO NOTHING
+            4. Devuelve { ok, status: 'created' | 'already_member', message }
+        → La UI muestra confirmación o error real (sin recargar)
+```
 
 ## 🧱 Stack técnico
 
@@ -94,6 +128,7 @@ Usuario → Landing (Next.js en Vercel)
 
 - **`knowledge_base`** — los datos del negocio (`category`, `fact`, `active`). Editables sin redeploy.
 - **`conversation_logs`** — cada interacción (`answered = false` revela qué preguntas frecuentes faltan en la KB).
+- **`club_members`** — registros reales del Club (`email` único, `name`, `source`). Captura de leads del Proyecto 2.
 - **`chat_requests`** — una fila por request para el rate limit por IP (ventana deslizante de 1 h).
 
 Ver [`db/schema.sql`](./db/schema.sql) y [`db/seed.sql`](./db/seed.sql).
@@ -110,6 +145,7 @@ Ver [`db/schema.sql`](./db/schema.sql) y [`db/seed.sql`](./db/seed.sql).
 ```
 app/
   api/chat/route.ts      Endpoint del asistente (validación, rate limit, Anthropic, logging)
+  api/club/route.ts      Endpoint del Club: valida, rate limit y guarda el lead en Neon
   page.tsx               Landing (composición de componentes)
   layout.tsx             Layout raíz + montaje del ChatWidget
   globals.css            Design system: tokens de color, tipografía, sombras
@@ -185,6 +221,7 @@ npm run dev           # http://localhost:3000
 ## 📄 Documentos del proyecto
 
 - [`prd.md`](./prd.md) — PRD completo: objetivo, KB, tono, comportamiento, criterios de éxito.
+- [`docs/investigacion-mercado.md`](./docs/investigacion-mercado.md) — investigación de mercado con IA (bonus del Proyecto 2).
 - [`AGENTS.md`](./AGENTS.md) / [`CLAUDE.md`](./CLAUDE.md) — notas para agentes de IA que trabajen en el repo.
 
 ---
