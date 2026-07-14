@@ -1,4 +1,5 @@
 import { neon } from "@neondatabase/serverless";
+import type { KitAnswers, KitResult } from "@/lib/kit/types";
 
 if (!process.env.DATABASE_URL) {
   throw new Error("Falta la variable de entorno DATABASE_URL");
@@ -125,6 +126,51 @@ export async function getSavedCarts(limit = 100): Promise<SavedCartRow[]> {
     LIMIT ${limit}
   `;
   return rows as SavedCartRow[];
+}
+
+// Guarda un lead del "Kit perfecto" en Neon. Devuelve el id creado.
+// answers y kit se guardan como JSONB; total lo calcula el servidor con el
+// motor de reglas (nunca desde el cliente).
+export async function saveKitLead(params: {
+  email: string;
+  whatsapp?: string | null;
+  name?: string | null;
+  answers: KitAnswers;
+  kit: KitResult;
+  total: number;
+}): Promise<number> {
+  const { email, whatsapp = null, name = null, answers, kit, total } = params;
+  const rows = (await sql`
+    INSERT INTO kit_leads (email, whatsapp, name, answers, kit, total)
+    VALUES (
+      ${email}, ${whatsapp}, ${name},
+      ${JSON.stringify(answers)}::jsonb, ${JSON.stringify(kit)}::jsonb, ${total}
+    )
+    RETURNING id
+  `) as { id: number }[];
+  return rows[0].id;
+}
+
+export type KitLeadRow = {
+  id: number;
+  email: string;
+  whatsapp: string | null;
+  name: string | null;
+  answers: KitAnswers;
+  kit: KitResult;
+  total: string; // NUMERIC vuelve como string desde Postgres
+  created_at: string;
+};
+
+// Últimos leads del Kit (para el panel). El más reciente primero.
+export async function getKitLeads(limit = 100): Promise<KitLeadRow[]> {
+  const rows = await sql`
+    SELECT id, email, whatsapp, name, answers, kit, total, created_at
+    FROM kit_leads
+    ORDER BY created_at DESC
+    LIMIT ${limit}
+  `;
+  return rows as KitLeadRow[];
 }
 
 // Máximo de mensajes por IP en la ventana (protección contra abuso del link público).

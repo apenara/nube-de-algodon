@@ -3,13 +3,21 @@ import type { Metadata } from "next";
 import {
   getClubMembers,
   getSavedCarts,
+  getKitLeads,
   type ClubMemberRow,
   type SavedCartRow,
+  type KitLeadRow,
   type SavedCartItem,
 } from "@/lib/db";
 import { maskEmail, maskPhone } from "@/lib/mask";
 import { CloudMark } from "@/components/CloudMark";
-import { ClubWelcomeEmail, CartConfirmationEmail } from "@/components/panel/EmailPreviews";
+import {
+  ClubWelcomeEmail,
+  CartConfirmationEmail,
+  KitEmail,
+} from "@/components/panel/EmailPreviews";
+import { recommend } from "@/lib/kit/recommend";
+import type { KitAnswers } from "@/lib/kit/types";
 
 // Lee de la base de datos en cada visita: dinámico, runtime Node, sin prerender.
 export const runtime = "nodejs";
@@ -26,6 +34,15 @@ const EXAMPLE_ITEMS: SavedCartItem[] = [
   { slug: "cochecito-nube", name: "Cochecito Nube 3 en 1", qty: 1, price: 189 },
   { slug: "body-algodon", name: "Body de algodón (pack x3)", qty: 2, price: 22 },
 ];
+
+// Kit de ejemplo para el preview cuando aún no hay kits guardados.
+const EXAMPLE_KIT = recommend({
+  stage: "0-3m",
+  mobility: "a-pie",
+  budget: "medio",
+  priority: "comodidad",
+  has: [],
+} satisfies KitAnswers);
 
 function fmtDate(iso: string): string {
   try {
@@ -44,10 +61,15 @@ function fmtDate(iso: string): string {
 export default async function PanelPage() {
   let clubMembers: ClubMemberRow[] = [];
   let savedCarts: SavedCartRow[] = [];
+  let kitLeads: KitLeadRow[] = [];
   let dbError = false;
 
   try {
-    [clubMembers, savedCarts] = await Promise.all([getClubMembers(), getSavedCarts()]);
+    [clubMembers, savedCarts, kitLeads] = await Promise.all([
+      getClubMembers(),
+      getSavedCarts(),
+      getKitLeads(),
+    ]);
   } catch {
     dbError = true;
   }
@@ -67,6 +89,11 @@ export default async function PanelPage() {
     : "Es mi primer bebé, nace en octubre 🤍";
   const usingExampleCart = !latestCart;
   const usingExampleClub = !clubMembers[0];
+
+  const latestKit = kitLeads[0];
+  const kitTo = latestKit ? maskEmail(latestKit.email) : "so•••@correo.com";
+  const kitResult = latestKit?.kit ?? EXAMPLE_KIT;
+  const usingExampleKit = !latestKit;
 
   return (
     <main className="min-h-screen bg-cream">
@@ -103,9 +130,10 @@ export default async function PanelPage() {
         ) : (
           <>
             {/* resumen */}
-            <div className="mt-8 grid grid-cols-2 gap-4 sm:grid-cols-3">
+            <div className="mt-8 grid grid-cols-2 gap-4 sm:grid-cols-4">
               <StatCard label="Registros del Club" value={String(clubMembers.length)} />
               <StatCard label="Carritos guardados" value={String(savedCarts.length)} />
+              <StatCard label="Kits armados" value={String(kitLeads.length)} />
               <StatCard
                 label="Valor en carritos"
                 value={`$${cartsValue.toLocaleString("es-CO")}`}
@@ -165,15 +193,49 @@ export default async function PanelPage() {
               )}
             </Section>
 
+            {/* kits armados */}
+            <Section title="Kits armados (leads del recomendador)" count={kitLeads.length}>
+              {kitLeads.length === 0 ? (
+                <Empty>Aún no hay kits guardados.</Empty>
+              ) : (
+                <ul className="space-y-3">
+                  {kitLeads.map((k) => (
+                    <li key={k.id} className="rounded-2xl border border-sand/70 bg-cream/50 p-4">
+                      <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
+                        <span className="font-medium text-ink">{maskEmail(k.email)}</span>
+                        {k.whatsapp && (
+                          <span className="text-sm text-muted">
+                            WhatsApp: {maskPhone(k.whatsapp)}
+                          </span>
+                        )}
+                        <span className="rounded-pill bg-blush-soft/70 px-3 py-0.5 text-xs font-medium text-blush-deep">
+                          {k.kit.stageLabel}
+                        </span>
+                        <span className="ml-auto text-sm text-muted">{fmtDate(k.created_at)}</span>
+                      </div>
+                      <p className="mt-2 text-sm text-warmgray">
+                        {k.kit.included
+                          .map((i) => `${i.name}${i.qty > 1 ? ` ×${i.qty}` : ""}`)
+                          .join(" · ")}
+                      </p>
+                      <span className="mt-1 inline-block text-sm font-semibold text-ink">
+                        Kit ${Number(k.total).toLocaleString("es-CO")}
+                      </span>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </Section>
+
             {/* vista previa de correos */}
             <div className="mt-12">
               <h2 className="font-display text-2xl font-semibold text-ink">
                 Así se verían los correos
               </h2>
               <p className="mt-2 max-w-2xl text-sm text-warmgray">
-                Maquetas con el diseño de la marca, armadas con el{" "}
-                {usingExampleCart && usingExampleClub ? "un ejemplo" : "último registro real"}.
-                Aún no conectamos un servicio de envío: es una muestra del diseño.
+                Maquetas con el diseño de la marca, armadas con tus últimos registros reales
+                (o un ejemplo si aún no hay). Aún no conectamos un servicio de envío: es una
+                muestra del diseño.
               </p>
 
               <div className="mt-6 grid grid-cols-1 gap-8 lg:grid-cols-2">
@@ -194,6 +256,18 @@ export default async function PanelPage() {
                     items={cartItems}
                     total={cartTotal}
                     note={cartNote}
+                  />
+                </div>
+                <div>
+                  <p className="mb-3 text-sm font-semibold text-ink">
+                    Tu kit personalizado
+                    {usingExampleKit && <ExampleTag />}
+                  </p>
+                  <KitEmail
+                    toMasked={kitTo}
+                    stageLabel={kitResult.stageLabel}
+                    items={kitResult.included}
+                    total={Number(kitResult.total)}
                   />
                 </div>
               </div>

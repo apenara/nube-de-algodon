@@ -44,6 +44,24 @@ CREATE TABLE IF NOT EXISTS saved_carts (
 
 CREATE INDEX IF NOT EXISTS idx_saved_carts_email ON saved_carts (email);
 
+-- Leads del "Kit perfecto para tu bebé" (Proyecto 3: herramienta de valor).
+-- La persona hace un quiz de 5 preguntas y recibe un kit personalizado; deja
+-- su correo para guardarlo/recibirlo. Guardamos tanto las respuestas (answers)
+-- como el kit recomendado (kit), ambos JSONB, para saber POR QUÉ es un buen lead.
+-- total lo recalcula el servidor con el motor de reglas (no se confía en el cliente).
+CREATE TABLE IF NOT EXISTS kit_leads (
+  id SERIAL PRIMARY KEY,
+  email TEXT NOT NULL,
+  whatsapp TEXT,               -- opcional
+  name TEXT,                   -- opcional
+  answers JSONB NOT NULL,      -- respuestas del quiz { stage, mobility, budget, priority, has }
+  kit JSONB NOT NULL,          -- kit recomendado { included, total, ... }
+  total NUMERIC(10,2) NOT NULL,
+  created_at TIMESTAMPTZ DEFAULT now()
+);
+
+CREATE INDEX IF NOT EXISTS idx_kit_leads_email ON kit_leads (email);
+
 -- Rate limiting simple por IP (ventana deslizante de 1 hora).
 -- Una fila por request; se cuentan las de la última hora.
 CREATE TABLE IF NOT EXISTS chat_requests (

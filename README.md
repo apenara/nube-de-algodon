@@ -1,8 +1,9 @@
 # ☁️ Nube de Algodón — Asistente de IA para una tienda de bebés
 
-> **Proyectos 1 y 2 · The Vibecoders League (reto de Platzi).**
+> **Proyectos 1, 2 y 3 · The Vibecoders League (reto de Platzi).**
 > Tienda online ficticia de artículos para bebés con un **asistente conversacional de IA**
-> (Proyecto 1) y **captura real de datos** desde el formulario del Club (Proyecto 2). Todo se
+> (Proyecto 1), **captura real de datos** desde el formulario del Club y el carrito (Proyecto 2),
+> y un **recomendador de kit** que da valor antes de pedir el contacto (Proyecto 3). Todo se
 > guarda de verdad en una base de datos.
 
 **🔗 Demo:** https://nube-de-algodon.vercel.app/
@@ -55,8 +56,8 @@ La mascota de la marca —una nube con carita— **es** el asistente (no un "bot
 Una tienda completa que le da contexto al asistente, con dirección de diseño propia
 (**"Suave nube / táctil pastel"**, deliberadamente lejos del look "AI genérico"):
 
-`AnnouncementBar · SiteHeader · Hero · BenefitsStrip · FeaturedProducts · Categories ·
-TrustSection · AssistantPreview · GiftRegistry · ClubNewsletter · SiteFooter`
+`AnnouncementBar · SiteHeader · Hero · BenefitsStrip · FeaturedProducts · KitPromo ·
+Categories · TrustSection · AssistantPreview · GiftRegistry · ClubNewsletter · SiteFooter`
 
 Las fotos de producto son generadas y optimizadas a WebP. El buscador es **visual por ahora**
 (una demo del reto); al interactuar aparece un aviso amable (`components/DemoToast.tsx`). En
@@ -124,6 +125,47 @@ Persona → Agrega productos (CartContext + localStorage)
         → La UI muestra "¡Gracias!" y vacía el carrito
 ```
 
+## 🎁 Proyecto 3 — La forma más creativa de capturar leads
+
+> **Proyecto 3 · The Vibecoders League (Platzi).** Construir una **herramienta que la gente
+> quiera usar por sí misma**: primero das valor real, después pides el contacto. Nada de
+> formularios fríos.
+
+**"Arma el kit perfecto para tu bebé"** (`/kit`, `components/kit/KitTool.tsx`) — un
+recomendador interactivo que ataca el dolor documentado en la investigación de mercado: el
+primerizo abrumado, con miedo a comprar mal.
+
+- **Valor primero, sin pedir nada** — un quiz de 5 preguntas (etapa · movilidad · presupuesto ·
+  qué ya tienes · prioridad) genera al instante un **kit personalizado**: qué productos, en qué
+  **talla y cantidad**, el **porqué** de cada uno y consejos tipo _"no compres el coche sin
+  verificar que…"_. Todo se ve gratis, sin registrarse.
+- **Motor de reglas puras, determinista** (`lib/kit/recommend.ts`) — sin IA ni base de datos:
+  las mismas respuestas dan el mismo kit. Es **isomórfico**, así que el cliente lo usa para
+  mostrar el resultado al instante y el servidor lo **vuelve a ejecutar al guardar** (no confía
+  en el kit que manda el cliente). Cada producto define su rol (esencial/recomendado/opcional),
+  cantidad, talla y consejo según las respuestas; el presupuesto y la prioridad deciden qué
+  entra "en tu kit" y qué queda "para más adelante".
+- **Intercambio justo → lead real** — para **guardar/recibir** el kit (con tallas, consejos y un
+  10%), la persona deja su correo → `POST /api/kit` → se guarda en **`kit_leads`** con las
+  **respuestas** y el **kit** completos (ambos JSONB) y el total recalculado en el servidor. Es
+  el lead más rico del proyecto: sabemos la etapa del bebé, el presupuesto, qué ya tiene y qué
+  necesita. También puede **llevar el kit al carrito** (reutiliza el Proyecto 2).
+- **Prueba visible** — el `/panel` muestra los kits guardados (enmascarados) y una **maqueta del
+  correo "Tu kit personalizado"** con el diseño de la marca, armada con el último kit real.
+
+**Flujo del recomendador:**
+
+```
+Persona → Quiz de 5 preguntas (components/kit/KitTool.tsx)
+        → recommend(answers) en el cliente → ve su kit al instante (gratis)
+        → "Guardar mi kit y recibir 10%" (email + WhatsApp opcional)
+        → POST /api/kit  { email, answers }
+            1. Valida el correo y los enums de las respuestas en el servidor
+            2. recommend(answers) OTRA VEZ en el servidor (no confía en el cliente)
+            3. Rate limit por IP + INSERT en kit_leads (answers + kit JSONB, total)
+        → La UI muestra "¡Tu kit está guardado!" + opción de llevarlo al carrito
+```
+
 ## 🧱 Stack técnico
 
 | Capa                 | Tecnología                                                  |
@@ -159,6 +201,7 @@ Usuario → Landing (Next.js en Vercel)
 - **`conversation_logs`** — cada interacción (`answered = false` revela qué preguntas frecuentes faltan en la KB).
 - **`club_members`** — registros reales del Club (`email` único, `name`, `source`). Captura de leads del Proyecto 2.
 - **`saved_carts`** — carritos guardados como lead (`email`, `whatsapp`, `note`, `items` JSONB, `total`). El total lo calcula el servidor desde el catálogo.
+- **`kit_leads`** — leads del recomendador de kit (`email`, `whatsapp`, `answers` JSONB, `kit` JSONB, `total`). Captura del Proyecto 3: guardamos las respuestas del quiz y el kit recomendado.
 - **`chat_requests`** — una fila por request para el rate limit por IP (ventana deslizante de 1 h).
 
 Ver [`db/schema.sql`](./db/schema.sql) y [`db/seed.sql`](./db/seed.sql).
@@ -177,6 +220,8 @@ app/
   api/chat/route.ts      Endpoint del asistente (validación, rate limit, Anthropic, logging)
   api/club/route.ts      Endpoint del Club: valida, rate limit y guarda el lead en Neon
   api/cart/route.ts      Endpoint del carrito: valida, recalcula total y guarda en saved_carts
+  api/kit/route.ts       Endpoint del kit: valida, recalcula el kit y guarda en kit_leads
+  kit/page.tsx           Recomendador "Arma el kit perfecto para tu bebé" (Proyecto 3)
   panel/page.tsx         Panel de registros (leads enmascarados) + vista previa de correos
   page.tsx               Landing (composición de componentes)
   layout.tsx             Layout raíz + montaje del ChatWidget
@@ -184,11 +229,14 @@ app/
 components/               Componentes de la landing (Hero, FeaturedProducts, …)
   chat/ChatWidget.tsx    UI del chat (launcher flotante + panel)
   cart/                  Carrito real: CartButton, AddToCartButton, CartDrawer
+  kit/KitTool.tsx        Recomendador de kit (quiz → resultado → guardar lead)
+  KitPromo.tsx           Gancho en la home hacia /kit
   panel/                 Maquetas de correo con la marca (EmailFrame, EmailPreviews)
   DemoToast.tsx          Aviso "esto es una demo" en controles decorativos
 lib/
-  db.ts                  Cliente Neon + helpers (KB, logs, checkRateLimit, saveClubMember, saveCart, get*)
+  db.ts                  Cliente Neon + helpers (KB, logs, checkRateLimit, saveClubMember, saveCart, saveKitLead, get*)
   cart/CartContext.tsx   Estado del carrito (provider + useCart, persiste en localStorage)
+  kit/                   Recomendador: types, questions (quiz) y recommend() (motor de reglas)
   mask.ts                Enmascara correos/teléfonos para el panel público
   assistant/
     prompt.ts            buildSystemPrompt(), RESPONDER_TOOL, WELCOME

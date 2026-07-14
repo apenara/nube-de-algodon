@@ -1,9 +1,10 @@
 import Image from "next/image";
 import type { SavedCartItem } from "@/lib/db";
+import type { KitItem } from "@/lib/kit/types";
 import { EmailFrame } from "./EmailFrame";
 
 export const CLUB_COUPON = "NUBE10";
-const FROM = "Nube de Algodón <nube@nubedealgodon.com>";
+export const FROM = "Nube de Algodón <nube@nubedealgodon.com>";
 
 // Correo de bienvenida al Club, con el código de descuento.
 export function ClubWelcomeEmail({ toMasked }: { toMasked: string }) {
@@ -106,6 +107,72 @@ export function CartConfirmationEmail({
       <div className="mt-7">
         <span className="inline-flex h-11 items-center rounded-pill bg-powder-deep px-7 text-sm font-semibold text-cloud">
           Ver la tienda
+        </span>
+      </div>
+    </EmailFrame>
+  );
+}
+
+// Correo con el "Kit perfecto" personalizado que armó la persona en /kit.
+export function KitEmail({
+  toMasked,
+  stageLabel,
+  items,
+  total,
+}: {
+  toMasked: string;
+  stageLabel: string;
+  items: KitItem[];
+  total: number;
+}) {
+  return (
+    <EmailFrame from={FROM} to={toMasked} subject="Tu kit personalizado 🤍 (y tu 10%)">
+      <h1 className="font-display text-2xl font-semibold text-ink">
+        Aquí tienes tu kit 🤍
+      </h1>
+      <p className="mt-4 text-warmgray">
+        Preparamos esta lista pensando en {stageLabel}. Son las cosas que de verdad vas a
+        necesitar, con la talla y cantidad sugeridas. Si algo no te cuadra, respóndenos y
+        Nube te ayuda a ajustarlo.
+      </p>
+
+      <div className="mt-6 space-y-3">
+        {items.map((item) => (
+          <div key={item.slug} className="flex items-center gap-3">
+            <Image
+              src={`/products/${item.slug}.webp`}
+              alt={item.name}
+              width={48}
+              height={48}
+              className="h-12 w-12 shrink-0 rounded-xl bg-cream object-cover"
+            />
+            <div className="flex-1">
+              <p className="text-sm font-semibold text-ink">{item.name}</p>
+              <p className="text-xs text-muted">
+                Cantidad: {item.qty}
+                {item.size ? ` · ${item.size}` : ""}
+              </p>
+            </div>
+            <span className="text-sm font-semibold text-ink">${item.price * item.qty}</span>
+          </div>
+        ))}
+      </div>
+
+      <div className="mt-4 flex items-center justify-between border-t border-sand pt-4">
+        <span className="text-sm text-warmgray">Total del kit</span>
+        <span className="font-display text-lg font-semibold text-ink">${total}</span>
+      </div>
+
+      <div className="mt-6 rounded-2xl border border-dashed border-powder-deep bg-powder-soft/40 px-6 py-5 text-center">
+        <p className="text-xs uppercase tracking-wider text-warmgray">Tu 10% de bienvenida</p>
+        <p className="mt-1 font-display text-3xl font-semibold tracking-wide text-powder-deep">
+          {CLUB_COUPON}
+        </p>
+      </div>
+
+      <div className="mt-7">
+        <span className="inline-flex h-11 items-center rounded-pill bg-powder-deep px-7 text-sm font-semibold text-cloud">
+          Ver mi kit en la tienda
         </span>
       </div>
     </EmailFrame>

@@ -3,6 +3,7 @@ import { SiteHeader } from "@/components/SiteHeader";
 import { Hero } from "@/components/Hero";
 import { BenefitsStrip } from "@/components/BenefitsStrip";
 import { FeaturedProducts } from "@/components/FeaturedProducts";
+import { KitPromo } from "@/components/KitPromo";
 import { Categories } from "@/components/Categories";
 import { TrustSection } from "@/components/TrustSection";
 import { AssistantPreview } from "@/components/AssistantPreview";
@@ -19,6 +20,7 @@ export default function Home() {
         <Hero />
         <BenefitsStrip />
         <FeaturedProducts />
+        <KitPromo />
         <Categories />
         <TrustSection />
         <AssistantPreview />
