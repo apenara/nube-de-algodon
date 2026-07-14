@@ -1,26 +1,84 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
+/* ------------------------------------------------------------------ *
+ *  Nube de Algodón — Design System
+ *  Dirección: "Suave nube / táctil pastel"
+ *  Cálido, mullido, cercano. Nada de blanco plano ni gradientes AI.
+ * ------------------------------------------------------------------ */
+
+@theme {
+  /* — Paleta — */
+  --color-cloud: #fbfaf7; /* fondo base, hueso cálido */
+  --color-cream: #f5efe6; /* secciones/cards cálidas */
+  --color-sand: #efe6d6; /* borde/relieve suave */
+
+  --color-ink: #3a342e; /* titulares, casi-negro cálido */
+  --color-warmgray: #5c5a57; /* cuerpo */
+  --color-muted: #8a857d; /* texto secundario */
+
+  --color-powder: #aec6d9; /* azul polvo (acento principal) */
+  --color-powder-soft: #dbe7f0; /* tinte suave para fondos */
+  --color-powder-deep: #4e7091; /* azul accesible para texto/botón */
+
+  --color-blush: #e8c4c0; /* rubor (acento cálido) */
+  --color-blush-soft: #f5e3e1;
+  --color-blush-deep: #b87d76;
+
+  --color-sage: #9db596; /* verde tierno (variedad puntual) */
+  --color-honey: #e7c98f; /* miel suave (variedad puntual) */
+
+  /* — Tipografía — */
+  --font-display: var(--font-fraunces); /* serif redondeada, titulares */
+  --font-sans: var(--font-nunito); /* geométrica suave, cuerpo */
+
+  /* — Sombras mullidas (nube) — */
+  --shadow-cloud: 0 24px 60px -28px rgba(78, 112, 145, 0.45);
+  --shadow-cloud-sm: 0 14px 34px -20px rgba(78, 112, 145, 0.4);
+  --shadow-lift: 0 2px 0 rgba(255, 255, 255, 0.7) inset,
+    0 20px 44px -24px rgba(78, 112, 145, 0.35);
+
+  /* — Radios generosos — */
+  --radius-pill: 999px;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+/* Textura de grano muy sutil sobre todo el fondo: da tacto y
+   evita el aspecto "vector plano" del diseño AI genérico. */
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  opacity: 0.4;
+  mix-blend-mode: multiply;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.05'/%3E%3C/svg%3E");
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+html {
+  scroll-behavior: smooth;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background: var(--color-cloud);
+  color: var(--color-warmgray);
+  font-family: var(--font-sans), system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+/* Contenido por encima del grano */
+body > * {
+  position: relative;
+  z-index: 1;
+}
+
+::selection {
+  background: var(--color-blush);
+  color: var(--color-ink);
+}
+
+/* Titulares con la serif y un tracking un pelín cerrado */
+.font-display {
+  font-family: var(--font-display), Georgia, serif;
+  letter-spacing: -0.01em;
 }
