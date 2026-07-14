@@ -85,6 +85,13 @@ se guarda como una solicitud de asesoría (lead), no como una compra.
   con los productos (JSONB) y el contacto. El **servidor recalcula el total desde el catálogo**
   (ignora precios/slugs falsos que mande el cliente). Es un lead rico: sabemos exactamente qué
   productos considera cada familia, ideal para que Nube (el asistente) los asesore.
+- **Panel de registros + vista previa de correos** (`/panel`, `app/panel/page.tsx`) — lee de Neon
+  y muestra los leads capturados (Club y carritos) como **prueba visible** de que los datos se
+  guardan de verdad. Los correos y teléfonos van **enmascarados** (`lib/mask.ts`) por privacidad
+  y la página no se indexa. Incluye una **maqueta de los correos con el diseño de la marca**
+  (bienvenida del Club con cupón + confirmación del carrito, en `components/panel/`), armada con
+  el último registro real. _Nota: aún no hay servicio de envío conectado — es una muestra del
+  diseño, no se envían correos._
 - **Diseño responsive** — Tailwind con breakpoints móviles; el chat y los formularios funcionan
   en celular (incluido el fix de teclado en iOS Safari).
 - **Bonus — investigación de mercado con IA** — research con búsquedas web reales sobre el
@@ -170,16 +177,19 @@ app/
   api/chat/route.ts      Endpoint del asistente (validación, rate limit, Anthropic, logging)
   api/club/route.ts      Endpoint del Club: valida, rate limit y guarda el lead en Neon
   api/cart/route.ts      Endpoint del carrito: valida, recalcula total y guarda en saved_carts
+  panel/page.tsx         Panel de registros (leads enmascarados) + vista previa de correos
   page.tsx               Landing (composición de componentes)
   layout.tsx             Layout raíz + montaje del ChatWidget
   globals.css            Design system: tokens de color, tipografía, sombras
 components/               Componentes de la landing (Hero, FeaturedProducts, …)
   chat/ChatWidget.tsx    UI del chat (launcher flotante + panel)
   cart/                  Carrito real: CartButton, AddToCartButton, CartDrawer
+  panel/                 Maquetas de correo con la marca (EmailFrame, EmailPreviews)
   DemoToast.tsx          Aviso "esto es una demo" en controles decorativos
 lib/
-  db.ts                  Cliente Neon + helpers (KB, logs, checkRateLimit, saveClubMember, saveCart)
+  db.ts                  Cliente Neon + helpers (KB, logs, checkRateLimit, saveClubMember, saveCart, get*)
   cart/CartContext.tsx   Estado del carrito (provider + useCart, persiste en localStorage)
+  mask.ts                Enmascara correos/teléfonos para el panel público
   assistant/
     prompt.ts            buildSystemPrompt(), RESPONDER_TOOL, WELCOME
     types.ts             Tipos del asistente

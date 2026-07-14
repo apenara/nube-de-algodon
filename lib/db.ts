@@ -86,6 +86,47 @@ export async function saveCart(params: {
   return rows[0].id;
 }
 
+export type ClubMemberRow = {
+  id: number;
+  email: string;
+  name: string | null;
+  source: string;
+  created_at: string;
+};
+
+export type SavedCartRow = {
+  id: number;
+  email: string;
+  whatsapp: string | null;
+  name: string | null;
+  note: string | null;
+  items: SavedCartItem[];
+  total: string; // NUMERIC vuelve como string desde Postgres
+  created_at: string;
+};
+
+// Últimos registros del Club (para el panel). El más reciente primero.
+export async function getClubMembers(limit = 100): Promise<ClubMemberRow[]> {
+  const rows = await sql`
+    SELECT id, email, name, source, created_at
+    FROM club_members
+    ORDER BY created_at DESC
+    LIMIT ${limit}
+  `;
+  return rows as ClubMemberRow[];
+}
+
+// Últimos carritos guardados (para el panel). El más reciente primero.
+export async function getSavedCarts(limit = 100): Promise<SavedCartRow[]> {
+  const rows = await sql`
+    SELECT id, email, whatsapp, name, note, items, total, created_at
+    FROM saved_carts
+    ORDER BY created_at DESC
+    LIMIT ${limit}
+  `;
+  return rows as SavedCartRow[];
+}
+
 // Máximo de mensajes por IP en la ventana (protección contra abuso del link público).
 export const RATE_LIMIT_PER_HOUR = 20;
 

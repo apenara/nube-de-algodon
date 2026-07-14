@@ -140,10 +140,16 @@ export function CartDrawer() {
                 </svg>
               </div>
               <p className="mt-5 max-w-xs text-ink">{message}</p>
+              <a
+                href="/panel"
+                className="mt-4 text-sm font-semibold text-powder-deep hover:underline"
+              >
+                Ver registros y cómo se vería tu correo →
+              </a>
               <button
                 type="button"
                 onClick={handleClose}
-                className="mt-8 h-11 rounded-pill bg-powder-deep px-7 text-sm font-semibold text-cloud transition-transform hover:-translate-y-0.5"
+                className="mt-6 h-11 rounded-pill bg-powder-deep px-7 text-sm font-semibold text-cloud transition-transform hover:-translate-y-0.5"
               >
                 Seguir explorando
               </button>

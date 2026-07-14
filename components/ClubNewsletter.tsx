@@ -62,13 +62,21 @@ export function ClubNewsletter() {
             </p>
 
             {status === "success" ? (
-              <div
-                role="status"
-                aria-live="polite"
-                className="mx-auto mt-8 flex max-w-md items-center justify-center gap-2 rounded-3xl border border-powder bg-cloud px-6 py-5 text-sm font-medium text-ink"
-              >
-                <CloudMark className="h-6 w-8 shrink-0" />
-                <span>{message}</span>
+              <div className="mx-auto mt-8 max-w-md">
+                <div
+                  role="status"
+                  aria-live="polite"
+                  className="flex items-center justify-center gap-2 rounded-3xl border border-powder bg-cloud px-6 py-5 text-sm font-medium text-ink"
+                >
+                  <CloudMark className="h-6 w-8 shrink-0" />
+                  <span>{message}</span>
+                </div>
+                <a
+                  href="/panel"
+                  className="mt-3 inline-block text-sm font-semibold text-powder-deep hover:underline"
+                >
+                  Ver registros y cómo se vería tu correo →
+                </a>
               </div>
             ) : (
               <form
