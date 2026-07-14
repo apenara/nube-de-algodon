@@ -69,9 +69,14 @@ export function AssistantPreview() {
               </Bubble>
             </div>
 
-            {/* input (maqueta, se conecta después) */}
+            {/* input: abre el chat en vivo con Nube */}
             <div className="border-t border-sand/70 px-4 py-4">
-              <div className="flex items-center gap-2 rounded-pill border border-sand bg-cream/50 px-4 py-2.5">
+              <button
+                type="button"
+                data-open-chat
+                aria-label="Abrir el chat con Nube"
+                className="flex w-full items-center gap-2 rounded-pill border border-sand bg-cream/50 px-4 py-2.5 text-left transition-colors hover:bg-cream"
+              >
                 <span className="flex-1 text-sm text-muted">
                   Escribe tu pregunta…
                 </span>
@@ -80,9 +85,9 @@ export function AssistantPreview() {
                     <path d="M5 12h14M13 6l6 6-6 6" />
                   </svg>
                 </span>
-              </div>
+              </button>
               <p className="mt-2 text-center text-xs text-muted">
-                Chat en vivo — se activa en el siguiente paso
+                Toca para hablar con Nube · responde en segundos
               </p>
             </div>
           </div>

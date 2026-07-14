@@ -62,6 +62,7 @@ export function SiteHeader() {
 
           <a
             href="#asistente"
+            data-open-chat
             className="hidden h-10 items-center rounded-pill bg-powder-deep px-5 text-sm font-semibold text-cloud shadow-cloud-sm transition-transform hover:-translate-y-0.5 sm:inline-flex"
           >
             Preguntar

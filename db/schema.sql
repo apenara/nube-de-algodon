@@ -16,3 +16,14 @@ CREATE TABLE IF NOT EXISTS conversation_logs (
   answered BOOLEAN,            -- false si el bot admitió no saber
   created_at TIMESTAMPTZ DEFAULT now()
 );
+
+-- Rate limiting simple por IP (ventana deslizante de 1 hora).
+-- Una fila por request; se cuentan las de la última hora.
+CREATE TABLE IF NOT EXISTS chat_requests (
+  id SERIAL PRIMARY KEY,
+  ip TEXT NOT NULL,
+  created_at TIMESTAMPTZ DEFAULT now()
+);
+
+CREATE INDEX IF NOT EXISTS idx_chat_requests_ip_time
+  ON chat_requests (ip, created_at);

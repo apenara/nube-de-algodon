@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Fraunces, Nunito_Sans } from "next/font/google";
 import "./globals.css";
+import { ChatWidget } from "@/components/chat/ChatWidget";
 
 // Titulares: serif con carácter y ejes "soft" para un aire cálido y redondeado.
 const fraunces = Fraunces({
@@ -33,7 +34,10 @@ export default function RootLayout({
       lang="es"
       className={`${fraunces.variable} ${nunito.variable} h-full antialiased`}
     >
-      <body className="min-h-full flex flex-col">{children}</body>
+      <body className="min-h-full flex flex-col">
+        {children}
+        <ChatWidget />
+      </body>
     </html>
   );
 }

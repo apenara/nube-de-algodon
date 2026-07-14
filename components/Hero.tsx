@@ -51,6 +51,7 @@ export function Hero() {
           <div className="mt-9 flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center sm:gap-4">
             <a
               href="#asistente"
+              data-open-chat
               className="inline-flex items-center justify-center gap-2 rounded-pill bg-powder-deep px-7 py-3.5 text-base font-semibold text-cloud shadow-cloud transition-transform hover:-translate-y-0.5"
             >
               Pregúntame lo que necesites
