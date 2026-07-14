@@ -39,6 +39,7 @@ export function Categories() {
             <a
               key={cat.name}
               href="#tienda"
+              data-demo={`Estamos organizando el catálogo de ${cat.name} 🤍 En esta versión del reto de Platzi puedes preguntarle a Nube por estos productos.`}
               className="group flex items-center gap-4 rounded-3xl border border-sand/80 bg-cloud p-5 transition-all hover:-translate-y-1 hover:shadow-cloud-sm"
             >
               <span

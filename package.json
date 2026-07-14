@@ -9,7 +9,8 @@
     "lint": "eslint",
     "db:setup": "node db/setup.mjs",
     "images:generate": "node scripts/generate-product-images.mjs",
-    "images:optimize": "node scripts/optimize-images.mjs"
+    "images:optimize": "node scripts/optimize-images.mjs",
+    "brand:icon": "node scripts/generate-brand-icon.mjs"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.111.0",

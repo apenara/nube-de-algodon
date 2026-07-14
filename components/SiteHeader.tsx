@@ -1,4 +1,4 @@
-import { CloudMark } from "./CloudMark";
+import Image from "next/image";
 
 const nav = [
   { label: "Tienda", href: "#tienda" },
@@ -12,7 +12,14 @@ export function SiteHeader() {
     <header className="sticky top-0 z-30 border-b border-sand/70 bg-cloud/85 backdrop-blur-md">
       <div className="mx-auto flex h-16 w-full max-w-6xl items-center justify-between gap-4 px-6">
         <a href="#" className="flex shrink-0 items-center gap-2.5">
-          <CloudMark className="h-8 w-10" />
+          <Image
+            src="/brand/nube-icon.webp"
+            alt="Nube de Algodón"
+            width={40}
+            height={40}
+            priority
+            className="h-9 w-9 rounded-xl"
+          />
           <span className="font-display text-lg font-semibold text-ink">
             nube de algodón
           </span>
@@ -32,7 +39,10 @@ export function SiteHeader() {
 
         <div className="flex items-center gap-3">
           {/* buscador */}
-          <div className="hidden items-center gap-2 rounded-pill border border-sand bg-cream/60 px-4 py-2 md:flex">
+          <form
+            data-demo="El buscador es demostrativo en esta versión del reto de Platzi 🤍 Pregúntale a Nube y te ayuda a encontrar lo que buscas."
+            className="hidden items-center gap-2 rounded-pill border border-sand bg-cream/60 px-4 py-2 md:flex"
+          >
             <svg viewBox="0 0 24 24" className="h-4 w-4 text-muted" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
               <circle cx="11" cy="11" r="7" />
               <path d="M21 21l-4-4" />
@@ -43,11 +53,12 @@ export function SiteHeader() {
               aria-label="Buscar productos"
               className="w-36 bg-transparent text-sm text-ink outline-none placeholder:text-muted"
             />
-          </div>
+          </form>
 
           {/* carrito */}
           <button
             type="button"
+            data-demo="Tu carrito es demostrativo — esta es una versión simple para el reto de Platzi 🤍"
             aria-label="Carrito"
             className="relative flex h-10 w-10 items-center justify-center rounded-full border border-sand bg-cloud text-ink transition-colors hover:bg-cream"
           >

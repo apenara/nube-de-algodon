@@ -99,6 +99,7 @@ function ProductCard({
           </div>
           <button
             type="button"
+            data-demo="Agregar al carrito es demostrativo — versión simple para el reto de Platzi 🤍 Pregúntale a Nube sobre este producto."
             aria-label={`Agregar ${product.name}`}
             className="flex h-10 w-10 items-center justify-center rounded-full bg-powder-deep text-cloud transition-transform hover:scale-110"
           >

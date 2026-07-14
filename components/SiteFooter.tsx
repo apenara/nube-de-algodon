@@ -1,4 +1,4 @@
-import { CloudMark } from "./CloudMark";
+import Image from "next/image";
 
 export function SiteFooter() {
   return (
@@ -8,7 +8,13 @@ export function SiteFooter() {
           {/* marca */}
           <div className="lg:col-span-1">
             <div className="flex items-center gap-2.5">
-              <CloudMark className="h-8 w-10" />
+              <Image
+                src="/brand/nube-icon.webp"
+                alt="Nube de Algodón"
+                width={40}
+                height={40}
+                className="h-9 w-9 rounded-xl"
+              />
               <span className="font-display text-lg font-semibold text-ink">
                 nube de algodón
               </span>

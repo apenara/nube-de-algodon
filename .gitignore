@@ -42,3 +42,7 @@ next-env.d.ts
 
 .vercel
 .env*
+
+# logs / tooling noise
+firebase-debug.log*
+*-debug.log

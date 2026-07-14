@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Fraunces, Nunito_Sans } from "next/font/google";
 import "./globals.css";
 import { ChatWidget } from "@/components/chat/ChatWidget";
+import { DemoToast } from "@/components/DemoToast";
 
 // Titulares: serif con carácter y ejes "soft" para un aire cálido y redondeado.
 const fraunces = Fraunces({
@@ -18,10 +19,29 @@ const nunito = Nunito_Sans({
   display: "swap",
 });
 
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000";
+const TITLE = "Nube de Algodón — Todo para tu bebé, con calma";
+const DESCRIPTION =
+  "Tienda online de artículos para bebés con asesoría cercana. Ropa, cochecitos, cunas, sillas para auto y más. Pregúntale a Nube, tu asistente, y resuelve tus dudas en segundos.";
+
 export const metadata: Metadata = {
-  title: "Nube de Algodón — Todo para tu bebé, con calma",
-  description:
-    "Tienda online de artículos para bebés con asesoría cercana. Ropa, cochecitos, cunas, sillas para auto y más. Habla con nuestro asistente y resuelve tus dudas en segundos.",
+  metadataBase: new URL(SITE_URL),
+  title: TITLE,
+  description: DESCRIPTION,
+  applicationName: "Nube de Algodón",
+  openGraph: {
+    title: TITLE,
+    description: DESCRIPTION,
+    url: "/",
+    siteName: "Nube de Algodón",
+    locale: "es_ES",
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: TITLE,
+    description: DESCRIPTION,
+  },
 };
 
 export default function RootLayout({
@@ -37,6 +57,7 @@ export default function RootLayout({
       <body className="min-h-full flex flex-col">
         {children}
         <ChatWidget />
+        <DemoToast />
       </body>
     </html>
   );

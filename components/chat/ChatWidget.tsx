@@ -172,11 +172,12 @@ export function ChatWidget() {
           aria-label="Abrir el chat con Nube"
           className="group fixed bottom-5 right-5 z-40 flex items-center gap-2.5 rounded-pill bg-powder-deep py-3 pl-3 pr-5 text-cloud shadow-cloud transition-transform hover:-translate-y-0.5 sm:bottom-6 sm:right-6"
         >
-          <span className="flex h-9 w-9 items-center justify-center rounded-full bg-cloud/95">
+          <span className="relative flex h-9 w-9 items-center justify-center rounded-full bg-cloud/95">
             <CloudMark className="h-6 w-8" />
+            {/* indicador de presencia, asentado sobre el avatar */}
+            <span className="absolute bottom-0 right-0 h-2.5 w-2.5 rounded-full bg-sage ring-2 ring-powder-deep" />
           </span>
           <span className="text-sm font-semibold">Pregúntale a Nube</span>
-          <span className="absolute -right-0.5 -top-0.5 h-3 w-3 rounded-full bg-sage ring-2 ring-cloud" />
         </button>
       )}
 

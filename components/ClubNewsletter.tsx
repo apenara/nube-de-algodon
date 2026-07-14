@@ -20,7 +20,10 @@ export function ClubNewsletter() {
               consejos para primerizos y avisos de novedades. Sin spam, lo prometemos.
             </p>
 
-            <form className="mx-auto mt-8 flex max-w-md flex-col gap-3 sm:flex-row">
+            <form
+              data-demo="¡Gracias por tu interés! El registro al club es demostrativo en esta versión simple del reto de Platzi 🤍"
+              className="mx-auto mt-8 flex max-w-md flex-col gap-3 sm:flex-row"
+            >
               <input
                 type="email"
                 required

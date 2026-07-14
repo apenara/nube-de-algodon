@@ -21,6 +21,7 @@ export function GiftRegistry() {
             </p>
             <a
               href="#asistente"
+              data-open-chat
               className="mt-8 inline-flex items-center gap-2 rounded-pill bg-cloud px-7 py-3.5 text-base font-semibold text-powder-deep transition-transform hover:-translate-y-0.5"
             >
               Pregúntale al asistente cómo empezar
