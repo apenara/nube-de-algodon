@@ -71,6 +71,17 @@ body {
   color: var(--color-ink);
 }
 
+/* iOS Safari hace zoom automático al enfocar un campo con fuente < 16px,
+   lo que descuadra el chat y obliga a hacer zoom-out. Forzamos 16px en
+   móvil solo para los controles de formulario (el desktop no cambia). */
+@media (max-width: 640px) {
+  input,
+  textarea,
+  select {
+    font-size: 16px;
+  }
+}
+
 /* Titulares con la serif y un tracking un pelín cerrado */
 .font-display {
   font-family: var(--font-display), Georgia, serif;

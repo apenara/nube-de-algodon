@@ -57,6 +57,7 @@ export function ChatWidget() {
 
   const scrollRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+  const panelRef = useRef<HTMLDivElement>(null);
 
   // Abrir el chat desde cualquier botón con [data-open-chat] en la página.
   useEffect(() => {
@@ -79,9 +80,50 @@ export function ChatWidget() {
     });
   }, [messages, loading, open]);
 
-  // Enfocar el input al abrir.
+  // Enfocar el input al abrir (solo en desktop: en móvil abriría el
+  // teclado de golpe y taparía la conversación).
   useEffect(() => {
-    if (open) inputRef.current?.focus();
+    if (open && window.innerWidth >= 640) inputRef.current?.focus();
+  }, [open]);
+
+  // En móvil, iOS Safari NO encoge un panel `fixed` cuando aparece el
+  // teclado, así que el input queda escondido detrás. Seguimos el
+  // visualViewport para que el panel llene exactamente el área visible y
+  // el input siempre quede a la vista. En desktop dejamos que manden las
+  // clases de Tailwind (limpiamos los estilos inline).
+  useEffect(() => {
+    if (!open) return;
+    const panel = panelRef.current;
+    if (!panel) return;
+    const vv = window.visualViewport;
+
+    function sync() {
+      if (!panel) return;
+      const isMobile = window.innerWidth < 640;
+      if (!isMobile || !vv) {
+        panel.style.cssText = "";
+        return;
+      }
+      const m = 12; // margen alrededor del panel
+      panel.style.position = "fixed";
+      panel.style.left = `${m}px`;
+      panel.style.right = `${m}px`;
+      panel.style.width = "auto";
+      panel.style.top = `${vv.offsetTop + m}px`;
+      panel.style.bottom = "auto";
+      panel.style.height = `${vv.height - m * 2}px`;
+    }
+
+    sync();
+    vv?.addEventListener("resize", sync);
+    vv?.addEventListener("scroll", sync);
+    window.addEventListener("resize", sync);
+    return () => {
+      vv?.removeEventListener("resize", sync);
+      vv?.removeEventListener("scroll", sync);
+      window.removeEventListener("resize", sync);
+      if (panel) panel.style.cssText = "";
+    };
   }, [open]);
 
   const send = useCallback(
@@ -184,6 +226,7 @@ export function ChatWidget() {
       {/* Panel */}
       {open && (
         <div
+          ref={panelRef}
           role="dialog"
           aria-label="Chat con Nube, asesora de Nube de Algodón"
           className="fixed inset-x-3 bottom-3 top-3 z-40 flex flex-col overflow-hidden rounded-[26px] border border-sand bg-cloud shadow-cloud sm:inset-auto sm:bottom-6 sm:right-6 sm:top-auto sm:h-[min(620px,80vh)] sm:w-[390px]"

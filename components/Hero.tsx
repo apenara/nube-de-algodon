@@ -4,11 +4,11 @@ export function Hero() {
       {/* halo cálido detrás, muy sutil, sin gradiente "AI" */}
       <div
         aria-hidden
-        className="pointer-events-none absolute -top-24 right-[-10%] h-[520px] w-[520px] rounded-full bg-powder-soft/60 blur-3xl"
+        className="pointer-events-none absolute -top-16 right-[-25%] h-56 w-56 rounded-full bg-powder-soft/45 blur-3xl sm:-top-24 sm:right-[-10%] sm:h-[520px] sm:w-[520px] sm:bg-powder-soft/60"
       />
       <div
         aria-hidden
-        className="pointer-events-none absolute top-40 left-[-8%] h-[360px] w-[360px] rounded-full bg-blush-soft/60 blur-3xl"
+        className="pointer-events-none absolute top-52 left-[-30%] h-48 w-48 rounded-full bg-blush-soft/40 blur-3xl sm:top-40 sm:left-[-8%] sm:h-[360px] sm:w-[360px] sm:bg-blush-soft/60"
       />
 
       <div className="mx-auto grid w-full max-w-6xl grid-cols-1 items-center gap-10 px-6 pt-10 pb-16 md:grid-cols-[1.05fr_0.95fr] md:gap-12 md:pt-24 md:pb-28">
