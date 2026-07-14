@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Fraunces, Nunito_Sans } from "next/font/google";
 import "./globals.css";
+import { Analytics } from "@vercel/analytics/next";
 import { ChatWidget } from "@/components/chat/ChatWidget";
 import { DemoToast } from "@/components/DemoToast";
 
@@ -58,6 +59,7 @@ export default function RootLayout({
         {children}
         <ChatWidget />
         <DemoToast />
+        <Analytics />
       </body>
     </html>
   );
