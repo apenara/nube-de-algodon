@@ -28,6 +28,22 @@ CREATE TABLE IF NOT EXISTS club_members (
   created_at TIMESTAMPTZ DEFAULT now()
 );
 
+-- Carritos guardados como lead ("guarda tu selección y te asesoramos").
+-- items es JSONB: [{ slug, name, qty, price }]. total lo calcula el servidor
+-- desde el catálogo (no se confía en el precio que manda el cliente).
+CREATE TABLE IF NOT EXISTS saved_carts (
+  id SERIAL PRIMARY KEY,
+  email TEXT NOT NULL,
+  whatsapp TEXT,               -- opcional
+  name TEXT,                   -- opcional
+  note TEXT,                   -- mensaje opcional para la asesoría
+  items JSONB NOT NULL,        -- productos de la selección
+  total NUMERIC(10,2) NOT NULL,
+  created_at TIMESTAMPTZ DEFAULT now()
+);
+
+CREATE INDEX IF NOT EXISTS idx_saved_carts_email ON saved_carts (email);
+
 -- Rate limiting simple por IP (ventana deslizante de 1 hora).
 -- Una fila por request; se cuentan las de la última hora.
 CREATE TABLE IF NOT EXISTS chat_requests (

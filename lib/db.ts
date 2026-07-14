@@ -57,6 +57,35 @@ export async function saveClubMember(params: {
   return rows.length > 0 ? "created" : "already_member";
 }
 
+export type SavedCartItem = {
+  slug: string;
+  name: string;
+  qty: number;
+  price: number;
+};
+
+// Guarda un carrito como lead en Neon. Devuelve el id creado.
+// total lo calcula quien llama (el route handler, desde el catálogo real).
+export async function saveCart(params: {
+  email: string;
+  whatsapp?: string | null;
+  name?: string | null;
+  note?: string | null;
+  items: SavedCartItem[];
+  total: number;
+}): Promise<number> {
+  const { email, whatsapp = null, name = null, note = null, items, total } = params;
+  const rows = (await sql`
+    INSERT INTO saved_carts (email, whatsapp, name, note, items, total)
+    VALUES (
+      ${email}, ${whatsapp}, ${name}, ${note},
+      ${JSON.stringify(items)}::jsonb, ${total}
+    )
+    RETURNING id
+  `) as { id: number }[];
+  return rows[0].id;
+}
+
 // Máximo de mensajes por IP en la ventana (protección contra abuso del link público).
 export const RATE_LIMIT_PER_HOUR = 20;
 

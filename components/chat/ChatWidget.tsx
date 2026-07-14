@@ -47,8 +47,9 @@ export function ChatWidget() {
   const [loading, setLoading] = useState(false);
 
   // sessionId estable para el hilo (no se renderiza, no hay mismatch de hidratación).
-  const sessionRef = useRef<string>("");
-  if (!sessionRef.current) {
+  // Init perezoso del ref con el patrón que espera react-hooks: null + `== null`.
+  const sessionRef = useRef<string | null>(null);
+  if (sessionRef.current == null) {
     sessionRef.current =
       typeof crypto !== "undefined" && crypto.randomUUID
         ? crypto.randomUUID()
@@ -150,7 +151,7 @@ export function ChatWidget() {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
-            sessionId: sessionRef.current,
+            sessionId: sessionRef.current ?? "anon",
             messages: turns,
           }),
         });

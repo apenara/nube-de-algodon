@@ -58,10 +58,11 @@ Una tienda completa que le da contexto al asistente, con dirección de diseño p
 `AnnouncementBar · SiteHeader · Hero · BenefitsStrip · FeaturedProducts · Categories ·
 TrustSection · AssistantPreview · GiftRegistry · ClubNewsletter · SiteFooter`
 
-Las fotos de producto son generadas y optimizadas a WebP. El carrito y el buscador son
-**visuales por ahora** (una demo del reto, sin procesar compras reales); al interactuar con
-ellos aparece un aviso amable (`components/DemoToast.tsx`). El **formulario del Club sí es
-real**: guarda el correo en la base de datos (ver [Proyecto 2](#-proyecto-2--captura-real-de-datos)).
+Las fotos de producto son generadas y optimizadas a WebP. El buscador es **visual por ahora**
+(una demo del reto); al interactuar aparece un aviso amable (`components/DemoToast.tsx`). En
+cambio, **el formulario del Club y el carrito sí son reales**: guardan datos en la base de
+datos (ver [Proyecto 2](#-proyecto-2--captura-real-de-datos)). No procesamos pagos: el carrito
+se guarda como una solicitud de asesoría (lead), no como una compra.
 
 ## 🧾 Proyecto 2 — Captura real de datos
 
@@ -77,6 +78,13 @@ real**: guarda el correo en la base de datos (ver [Proyecto 2](#-proyecto-2--cap
   Neon (Postgres). Con validación de correo en el servidor, estados de éxito/error reales,
   manejo de duplicados (`ON CONFLICT (email) DO NOTHING`) y **rate limit por IP** para proteger
   el link público. No es un botón decorativo: los registros quedan en la base de datos.
+- **Carrito real → lead calificado** — el carrito no procesa pagos, pero **sí guarda datos**:
+  la persona agrega productos (estado en `lib/cart/CartContext.tsx`, persistido en
+  `localStorage`), los revisa en el drawer (`components/cart/CartDrawer.tsx`) y al pulsar
+  *"Guardar y pedir asesoría"* deja su correo → `POST /api/cart` → se guarda en **`saved_carts`**
+  con los productos (JSONB) y el contacto. El **servidor recalcula el total desde el catálogo**
+  (ignora precios/slugs falsos que mande el cliente). Es un lead rico: sabemos exactamente qué
+  productos considera cada familia, ideal para que Nube (el asistente) los asesore.
 - **Diseño responsive** — Tailwind con breakpoints móviles; el chat y los formularios funcionan
   en celular (incluido el fix de teclado en iOS Safari).
 - **Bonus — investigación de mercado con IA** — research con búsquedas web reales sobre el
@@ -93,6 +101,20 @@ Persona → Club (components/ClubNewsletter.tsx)
             3. INSERT en club_members con ON CONFLICT (email) DO NOTHING
             4. Devuelve { ok, status: 'created' | 'already_member', message }
         → La UI muestra confirmación o error real (sin recargar)
+```
+
+**Flujo del carrito:**
+
+```
+Persona → Agrega productos (CartContext + localStorage)
+        → Drawer (components/cart/CartDrawer.tsx): revisa cantidades y total
+        → "Guardar y pedir asesoría" (email + WhatsApp/nota opcionales)
+        → POST /api/cart  { email, items: [{ slug, qty }], ... }
+            1. Valida el correo y que el carrito no esté vacío
+            2. Resuelve cada slug contra el catálogo (ignora inventados)
+            3. Recalcula el total en el servidor (no confía en el cliente)
+            4. Rate limit por IP + INSERT en saved_carts (items JSONB)
+        → La UI muestra "¡Gracias!" y vacía el carrito
 ```
 
 ## 🧱 Stack técnico
@@ -129,6 +151,7 @@ Usuario → Landing (Next.js en Vercel)
 - **`knowledge_base`** — los datos del negocio (`category`, `fact`, `active`). Editables sin redeploy.
 - **`conversation_logs`** — cada interacción (`answered = false` revela qué preguntas frecuentes faltan en la KB).
 - **`club_members`** — registros reales del Club (`email` único, `name`, `source`). Captura de leads del Proyecto 2.
+- **`saved_carts`** — carritos guardados como lead (`email`, `whatsapp`, `note`, `items` JSONB, `total`). El total lo calcula el servidor desde el catálogo.
 - **`chat_requests`** — una fila por request para el rate limit por IP (ventana deslizante de 1 h).
 
 Ver [`db/schema.sql`](./db/schema.sql) y [`db/seed.sql`](./db/seed.sql).
@@ -146,14 +169,17 @@ Ver [`db/schema.sql`](./db/schema.sql) y [`db/seed.sql`](./db/seed.sql).
 app/
   api/chat/route.ts      Endpoint del asistente (validación, rate limit, Anthropic, logging)
   api/club/route.ts      Endpoint del Club: valida, rate limit y guarda el lead en Neon
+  api/cart/route.ts      Endpoint del carrito: valida, recalcula total y guarda en saved_carts
   page.tsx               Landing (composición de componentes)
   layout.tsx             Layout raíz + montaje del ChatWidget
   globals.css            Design system: tokens de color, tipografía, sombras
 components/               Componentes de la landing (Hero, FeaturedProducts, …)
   chat/ChatWidget.tsx    UI del chat (launcher flotante + panel)
+  cart/                  Carrito real: CartButton, AddToCartButton, CartDrawer
   DemoToast.tsx          Aviso "esto es una demo" en controles decorativos
 lib/
-  db.ts                  Cliente Neon + helpers (KB, logs, checkRateLimit)
+  db.ts                  Cliente Neon + helpers (KB, logs, checkRateLimit, saveClubMember, saveCart)
+  cart/CartContext.tsx   Estado del carrito (provider + useCart, persiste en localStorage)
   assistant/
     prompt.ts            buildSystemPrompt(), RESPONDER_TOOL, WELCOME
     types.ts             Tipos del asistente

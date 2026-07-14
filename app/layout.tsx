@@ -4,6 +4,8 @@ import "./globals.css";
 import { Analytics } from "@vercel/analytics/next";
 import { ChatWidget } from "@/components/chat/ChatWidget";
 import { DemoToast } from "@/components/DemoToast";
+import { CartProvider } from "@/lib/cart/CartContext";
+import { CartDrawer } from "@/components/cart/CartDrawer";
 
 // Titulares: serif con carácter y ejes "soft" para un aire cálido y redondeado.
 const fraunces = Fraunces({
@@ -56,9 +58,12 @@ export default function RootLayout({
       className={`${fraunces.variable} ${nunito.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col">
-        {children}
-        <ChatWidget />
-        <DemoToast />
+        <CartProvider>
+          {children}
+          <CartDrawer />
+          <ChatWidget />
+          <DemoToast />
+        </CartProvider>
         <Analytics />
       </body>
     </html>
